@@ -164,7 +164,7 @@ function clearPlayer(snapshot) {
 	$('#rps-player-' + playerId).empty();
 	$('#user-message').empty();
 
-	var chatDiv = $('<div>').addClass('chat-player-' + childSnapshot.val().player);
+	var chatDiv = $('<div>').addClass('chat-player-' + opponentId);
 	chatDiv.text(opponentName + ': Disconnected');
 	$('#chat').append(chatDiv);
 }
