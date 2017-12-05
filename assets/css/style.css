@@ -1,0 +1,24 @@
+.panel-body {
+  min-height: 150px;
+}
+
+body {
+  background-image: url("../images/green_cup.png");
+}
+
+button.list-group-item {
+    text-align: center;
+}
+
+#chat {
+	overflow: scroll;
+	max-height: 150px;
+}
+
+.chat-player-1 {
+	font-weight: bold;
+}
+
+.chat-player-2 {
+	font-weight: normal;
+}

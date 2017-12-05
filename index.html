@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="UTF-8">
+    <title>rps</title>
+
+    <!-- Bootstrap File -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="assets/css/style.css">
+
+  </head>
+  <body>
+
+    <div class="container">
+
+      <div class="jumbotron">
+        <h1 class="text-center">Rock, Paper, Scissors</h1>
+      </div>
+
+      <div class="row">
+        <div class="col-sm-6 col-sm-offset-3">
+          <div class="panel panel-default">
+            <div class="panel-body" id="player-name-entry">
+              <form>
+                <div class="form-group">
+                  <label for="name-input">Enter your name to start!</label>
+                  <input type="text" class="form-control" id="name-input" placeholder="name" required>
+                </div>
+                <button id="add-name" type="submit" class="btn btn-info">Start</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-sm-4">
+          <div class="panel panel-default">
+            <div class="panel-body" id="player-1">
+              <h3 class="text-center">Waiting for Player 1</h1>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-sm-4">
+          <div class="panel panel-default">
+            <div class="panel-body" id="game-status">
+            </div>
+          </div>
+        </div>
+
+        <div class="col-sm-4">
+          <div class="panel panel-default">
+            <div class="panel-body" id="player-2">
+              <h3 class="text-center">Waiting for Player 2</h1>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-sm-8 col-sm-offset-2">
+
+          <div class="panel panel-default">
+            <div class="panel-heading">Chat</div>
+              <div id="chat" class="panel-body">
+              </div>
+          </div>
+          
+          <!-- <form class="form-inline"> -->
+          <form>
+            <div class="form-group">
+              <input type="text" class="form-control" id="chat-input" required>
+            </div>
+            <button id="chat-send" type="submit" class="btn btn-info">Send</button>
+          </form>
+            
+        </div>
+      </div>
+
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/4.7.0/firebase.js"></script>
+    <script type="text/javascript" src="assets/javascript/app.js"></script>
+
+  </body>
+</html>
