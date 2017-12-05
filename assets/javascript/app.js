@@ -14,6 +14,8 @@ firebase.initializeApp(config);
 var database = firebase.database();
 var currentPlayers = [];
 
+
+// local variables to store information from firebase
 var playerName;
 var playerId;
 var playerMove = '';
@@ -24,6 +26,7 @@ var opponentName;
 var opponentId;
 var opponentMove = '';
 
+// Runs when user enters name and clicks 'start'
 $(document).on('click','#add-name', function(event) {
   event.preventDefault();
 
@@ -37,10 +40,11 @@ $(document).on('click','#add-name', function(event) {
     losses: 0
   };
 
+  // Can either be 1 or 2, depending on which user spot is available at the time
   playerId = determinePlayerNum();
 
+  // Sending player object to firebase, while also setting it up to delete when user disconnects
   var playerRef = database.ref('players/' + playerId);
-
   playerRef.set(player);
   playerRef.onDisconnect().remove();
   
@@ -48,39 +52,53 @@ $(document).on('click','#add-name', function(event) {
 
 // Perform action when player added
 database.ref('players').on("child_added", function(childSnapshot, prevChildKey) {
+  
+  // Adding user to currentPlayers array and calling setupPlayer
   currentPlayers.push(childSnapshot.key);
   setupPlayer(childSnapshot);
 
+  // If 2 players are in the game, start game by setting 'turn' to 1
   if (currentPlayers.length === 2) {
   	database.ref('turn').set(1);
   }
 
 });
 
+// Perform action when player object updated
 database.ref('players').on("child_changed", function(snapshot) {
+
+  // Update either playerMove or opponentMove depending on who just made a selection
   if (playerId == snapshot.key) {
   	playerMove = snapshot.val().choice;
   }
   else {
 	opponentMove = snapshot.val().choice;
   }
+
+  // Update span tags to show current wins and losses for player
   $('#wins-player-' + snapshot.key).text(snapshot.val().wins);
   $('#losses-player-' + snapshot.key).text(snapshot.val().losses);
 });
 
 // Perform action when player removed
 database.ref('players').on("child_removed", function(snapshot) {
+  // Remove user from currentPlayers array
   currentPlayers.splice(currentPlayers.indexOf(snapshot.key), 1);
+  // Set turn to 0 which stops game temporarily while we wait for another player to join, also call clearPlayer function
   database.ref('turn').set(0);
   clearPlayer(snapshot);
 });
 
+
+// Perform action when 'turn' is updated
 database.ref('turn').on("value", function(snapshot) {
-  
+  	
+  	// If turn is 0 and two choices have been made, game is over so we determine the winner
 	if (snapshot.val() === 0 && playerMove !== '' && opponentMove !== '') {
 		determineWinner ();
 	}
 
+	// If it's our turn, display the rps selection, otherwise display waiting message
   	if (playerId === snapshot.val()){
   		displayRPSSelection(snapshot);
   		$('#user-message').text("It's your turn!");
@@ -91,8 +109,8 @@ database.ref('turn').on("value", function(snapshot) {
   
 });
 
+// Determines if you're player 1 or player 2 based on currentPlayers array
 function determinePlayerNum() {
-	// Checks the currentPlayers array, returns playerId
 	if (currentPlayers.indexOf('1') === -1) {
 		return 1;
 	}
@@ -104,6 +122,7 @@ function determinePlayerNum() {
 	}
 }
 
+// Sets up player's screen to display their name & info in their corresponding area
 function setupPlayer(snapshot) {
 
 	if (playerId == snapshot.key) {
@@ -131,10 +150,9 @@ function setupPlayer(snapshot) {
 	playerInfoDiv.append(h2);
 	playerInfoDiv.append(h6);
 	playerInfoDiv.append(rpsDiv);
-
-
 }
 
+// Removes player info from screen, also sends 'disconnected' message to chat window
 function clearPlayer(snapshot) {
 
 	playerInfoDiv = $('#player-' + snapshot.key);
@@ -154,6 +172,7 @@ function clearPlayer(snapshot) {
 	database.ref('chats').push(chat);	
 }
 
+// Displays selection of 'rock', 'paper', 'scissors' for user to select
 function displayRPSSelection(snapshot) {
 
 	if (playerId === snapshot.val()) {
@@ -171,6 +190,7 @@ function displayRPSSelection(snapshot) {
 	}
 }
 
+// When user selects 'rock', 'paper', or 'scissors' update their choice in firebase 
 $(document).on('click','.rps', function() {
     var rpsValue = $(this).attr("data-rpsvalue");
     $('#rps-player-' + playerId).empty();
@@ -178,6 +198,7 @@ $(document).on('click','.rps', function() {
     $('#rps-player-' + playerId).append(h1);
     database.ref('players/' + playerId + '/choice').set(rpsValue);
 
+    // Set 'turn' to next player. If game is over, set 'turn' to 0 to determine winner and reset game
 	if (playerId == 2) {
     	database.ref('turn').set(0);	
 	}
@@ -186,6 +207,7 @@ $(document).on('click','.rps', function() {
 	}
 });
 
+// Determines if you are a winner or loser and updates your wins/losses in firebase
 function determineWinner() {
 
 	var winner;
@@ -224,6 +246,7 @@ function determineWinner() {
 
 	database.ref('players/' + playerId + '/choice').set('');
 
+	// After displaying winner for a few seconds, perform some cleanup and restart game by setting 'turn' to 1 (in my game, player 1 is always first to choose)
 	setTimeout(function(){
 		$('#game-status').empty();
 
@@ -241,6 +264,7 @@ function determineWinner() {
     }, 3000);
 }
 
+// Click event to send chat message to chat window
 $(document).on('click','#chat-send', function(event) {
   event.preventDefault();
 
@@ -254,14 +278,21 @@ $(document).on('click','#chat-send', function(event) {
 	    text: playerName + ': ' + chatText
 	  };
 
-	  database.ref('chats').push(chat);	
+	  // Remove chats after closing window
+	  var chatRef = database.ref('chats');
+  	  chatRef.push(chat);
+  	  chatRef.onDisconnect().remove();
   }
   
 });
 
-// Perform action when player added
+// Perform action when chat added
 database.ref('chats').on("child_added", function(childSnapshot, prevChildKey) {
-  	chatDiv = $('<div>').addClass('chat-player-' + childSnapshot.val().player);
-	chatDiv.text(childSnapshot.val().text);
-	$('#chat').append(chatDiv);
+	
+	// adding chat to chat window only if player selected
+	if (playerId != undefined) {
+  		chatDiv = $('<div>').addClass('chat-player-' + childSnapshot.val().player);
+		chatDiv.text(childSnapshot.val().text);
+		$('#chat').append(chatDiv);
+	}
 });
