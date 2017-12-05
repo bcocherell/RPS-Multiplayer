@@ -164,12 +164,9 @@ function clearPlayer(snapshot) {
 	$('#rps-player-' + playerId).empty();
 	$('#user-message').empty();
 
-	var chat = {
-	    player: opponentId,
-	    text: opponentName + ': Disconnected'
-	  };
-
-	database.ref('chats').push(chat);	
+	var chatDiv = $('<div>').addClass('chat-player-' + childSnapshot.val().player);
+	chatDiv.text(opponentName + ': Disconnected');
+	$('#chat').append(chatDiv);
 }
 
 // Displays selection of 'rock', 'paper', 'scissors' for user to select
@@ -289,7 +286,7 @@ $(document).on('click','#chat-send', function(event) {
 // Perform action when chat added
 database.ref('chats').on("child_added", function(childSnapshot, prevChildKey) {
 	
-	// adding chat to chat window only if player selected
+	// adding chat to chat window only if player selected (prevents new players from seeing old chats from previous games)
 	if (playerId != undefined) {
   		chatDiv = $('<div>').addClass('chat-player-' + childSnapshot.val().player);
 		chatDiv.text(childSnapshot.val().text);
